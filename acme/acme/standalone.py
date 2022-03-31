@@ -150,6 +150,10 @@ class TLSALPN01Server(TLSServer, ACMEServerMixin):
 
     ACME_TLS_1_PROTOCOL = b"acme-tls/1"
 
+    def __getattribute__(self, name):
+        print('Accessing', name, 'in TLSALPN01Server', file=sys.stderr)
+        return object.__getattribute__(self, name)
+
     def __init__(self, server_address: Tuple[str, int],
                  certs: List[Tuple[crypto.PKey, crypto.X509]],
                  challenge_certs: Mapping[str, Tuple[crypto.PKey, crypto.X509]],
@@ -309,6 +313,10 @@ class HTTP01RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 class _BaseRequestHandlerWithLogging(socketserver.BaseRequestHandler):
     """BaseRequestHandler with logging."""
 
+    def __getattribute__(self, name):
+        print('Accessing', name, 'in _BaseRequestHandlerWithLogging', file=sys.stderr)
+        return object.__getattribute__(self, name)
+
     def log_message(self, format: str, *args: Any) -> None:  # pylint: disable=redefined-builtin
         """Log arbitrary message."""
         logger.debug("%s - - %s", self.client_address[0], format % args)
@@ -317,4 +325,3 @@ class _BaseRequestHandlerWithLogging(socketserver.BaseRequestHandler):
         """Handle request."""
         self.log_message("Incoming request")
         socketserver.BaseRequestHandler.handle(self)
-        print('Made it', file=sys.stderr)
