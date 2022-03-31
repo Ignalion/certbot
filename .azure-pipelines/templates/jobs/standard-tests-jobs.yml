@@ -10,5 +10,6 @@ jobs:
           TOXENV: py310-cover
     pool:
       vmImage: $(IMAGE_NAME)
+    timeoutInMinutes: 0
     steps:
       - template: ../steps/tox-steps.yml
