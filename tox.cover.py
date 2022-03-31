@@ -48,7 +48,7 @@ def cover(package):
             .format(pkg_dir)))
         return
 
-    subprocess.check_call([sys.executable, '-m', 'pytest',
+    subprocess.check_call([sys.executable, '-m', 'pytest', '-s',
                            '--cov', pkg_dir, '--cov-append', '--cov-report=', pkg_dir])
     try:
         subprocess.check_call([

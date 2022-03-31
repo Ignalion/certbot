@@ -6,6 +6,7 @@ import http.server as BaseHTTPServer
 import logging
 import socket
 import socketserver
+import sys
 import threading
 from typing import Any
 from typing import cast
@@ -316,3 +317,4 @@ class _BaseRequestHandlerWithLogging(socketserver.BaseRequestHandler):
         """Handle request."""
         self.log_message("Incoming request")
         socketserver.BaseRequestHandler.handle(self)
+        print('Made it', file=sys.stderr)
