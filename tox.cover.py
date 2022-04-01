@@ -49,11 +49,11 @@ def cover(package):
         return
 
     subprocess.check_call([sys.executable, '-m', 'pytest', '-s',
-                           '--cov', pkg_dir, '--cov-append', '--cov-report=', pkg_dir])
+                           '--cov', pkg_dir, '--cov-append', '--cov-report=', f'{pkg_dir}/tests/standalone_test.py'])
     try:
         subprocess.check_call([
             sys.executable, '-m', 'coverage', 'report', '--fail-under',
-            str(threshold), '--include', '{0}/*'.format(pkg_dir),
+            str(threshold), '--include', '{0}/acme/standalone.py'.format(pkg_dir),
             '--show-missing'])
     except subprocess.CalledProcessError as err:
         print(err)

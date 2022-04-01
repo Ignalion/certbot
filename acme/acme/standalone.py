@@ -7,6 +7,7 @@ import logging
 import socket
 import socketserver
 import sys
+import traceback
 import threading
 from typing import Any
 from typing import cast
@@ -151,7 +152,7 @@ class TLSALPN01Server(TLSServer, ACMEServerMixin):
     ACME_TLS_1_PROTOCOL = b"acme-tls/1"
 
     def __getattribute__(self, name):
-        print('Accessing', name, 'in TLSALPN01Server', file=sys.stderr)
+        crypto_util.print_stack()
         return object.__getattribute__(self, name)
 
     def __init__(self, server_address: Tuple[str, int],
@@ -314,7 +315,7 @@ class _BaseRequestHandlerWithLogging(socketserver.BaseRequestHandler):
     """BaseRequestHandler with logging."""
 
     def __getattribute__(self, name):
-        print('Accessing', name, 'in _BaseRequestHandlerWithLogging', file=sys.stderr)
+        crypto_util.print_stack()
         return object.__getattribute__(self, name)
 
     def log_message(self, format: str, *args: Any) -> None:  # pylint: disable=redefined-builtin

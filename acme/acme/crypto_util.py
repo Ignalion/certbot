@@ -6,6 +6,9 @@ import logging
 import os
 import re
 import socket
+import sys
+import traceback
+import threading
 from typing import Any
 from typing import Callable
 from typing import List
@@ -22,6 +25,8 @@ from OpenSSL import SSL
 from acme import errors
 
 logger = logging.getLogger(__name__)
+should_print = False
+print_lock = threading.Lock()
 
 # Default SSL method selected here is the most compatible, while secure
 # SSL method: TLSv1_METHOD is only compatible with
@@ -31,6 +36,12 @@ logger = logging.getLogger(__name__)
 # should be changed to use "set_options" to disable SSLv2 and SSLv3,
 # in case it's used for things other than probing/serving!
 _DEFAULT_SSL_METHOD = SSL.SSLv23_METHOD
+
+def print_stack():
+    if should_print:
+        with print_lock:
+            traceback.print_stack()
+            print(file=sys.stderr)
 
 
 class _DefaultCertSelection:
@@ -80,6 +91,10 @@ class SSLSocket:  # pylint: disable=too-few-public-methods
     def __getattr__(self, name: str) -> Any:
         return getattr(self.sock, name)
 
+    def __getattribute__(self, name):
+        print_stack()
+        return object.__getattribute__(self, name)
+
     def _pick_certificate_cb(self, connection: SSL.Connection) -> None:
         """SNI certificate callback.
 
@@ -117,6 +132,10 @@ class SSLSocket:  # pylint: disable=too-few-public-methods
 
         def __getattr__(self, name: str) -> Any:
             return getattr(self._wrapped, name)
+
+        def __getattribute__(self, name):
+            print_stack()
+            return object.__getattribute__(self, name)
 
         def shutdown(self, *unused_args: Any) -> bool:
             # OpenSSL.SSL.Connection.shutdown doesn't accept any args
