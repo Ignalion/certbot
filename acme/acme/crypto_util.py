@@ -71,8 +71,10 @@ class SSLSocket:  # pylint: disable=too-few-public-methods
                  method: int = _DEFAULT_SSL_METHOD,
                  alpn_selection: Optional[Callable[[SSL.Connection, List[bytes]], bytes]] = None,
                  cert_selection: Optional[Callable[[SSL.Connection],
-                                                   Tuple[crypto.PKey, crypto.X509]]] = None
+                                                   Tuple[crypto.PKey, crypto.X509]]] = None,
+                 sock_should_print = False
                  ) -> None:
+        self.should_print = sock_should_print
         self.sock = sock
         self.alpn_selection = alpn_selection
         self.method = method
@@ -92,7 +94,8 @@ class SSLSocket:  # pylint: disable=too-few-public-methods
         return getattr(self.sock, name)
 
     def __getattribute__(self, name):
-        print_stack()
+        if object.__getattribute__(self, 'should_print'):
+            print_stack()
         return object.__getattribute__(self, name)
 
     def _pick_certificate_cb(self, connection: SSL.Connection) -> None:
@@ -132,10 +135,6 @@ class SSLSocket:  # pylint: disable=too-few-public-methods
 
         def __getattr__(self, name: str) -> Any:
             return getattr(self._wrapped, name)
-
-        def __getattribute__(self, name):
-            print_stack()
-            return object.__getattribute__(self, name)
 
         def shutdown(self, *unused_args: Any) -> bool:
             # OpenSSL.SSL.Connection.shutdown doesn't accept any args

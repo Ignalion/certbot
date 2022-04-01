@@ -39,13 +39,14 @@ class TLSServer(socketserver.TCPServer):
         self.certs = kwargs.pop("certs", {})
         self.method = kwargs.pop("method", crypto_util._DEFAULT_SSL_METHOD)
         self.allow_reuse_address = kwargs.pop("allow_reuse_address", True)
+        self.sock_should_print = kwargs.pop('sock_should_print', False)
         super().__init__(*args, **kwargs)
 
     def _wrap_sock(self) -> None:
         self.socket = cast(socket.socket, crypto_util.SSLSocket(
             self.socket, cert_selection=self._cert_selection,
             alpn_selection=getattr(self, '_alpn_selection', None),
-            method=self.method))
+            method=self.method, sock_should_print=self.sock_should_print))
 
     def _cert_selection(self, connection: SSL.Connection
                         ) -> Tuple[crypto.PKey, crypto.X509]:  # pragma: no cover
@@ -161,7 +162,7 @@ class TLSALPN01Server(TLSServer, ACMEServerMixin):
                  ipv6: bool = False) -> None:
         TLSServer.__init__(
             self, server_address, _BaseRequestHandlerWithLogging, certs=certs,
-            ipv6=ipv6)
+            ipv6=ipv6, sock_should_print=True)
         self.challenge_certs = challenge_certs
 
     def _cert_selection(self, connection: SSL.Connection) -> Tuple[crypto.PKey, crypto.X509]:
